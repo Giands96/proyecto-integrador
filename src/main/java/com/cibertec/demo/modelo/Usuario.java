@@ -1,12 +1,16 @@
 package com.cibertec.demo.modelo;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
+
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "usuario")
 @Data
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class Usuario {
 
     @Id
