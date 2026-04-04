@@ -7,9 +7,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -38,7 +41,14 @@ public class AuthController {
         );
 
         Usuario user = usuarioRepository.findByUsername(username).orElseThrow();
-        String token = jwtService.generateToken(user.getUsername());
+
+        UserDetails userDetails = new org.springframework.security.core.userdetails.User(
+                user.getUsername(),
+                user.getPassword(),
+                List.of(new SimpleGrantedAuthority(user.getRol().getNombreRol()))
+        );
+
+        String token = jwtService.generateToken(userDetails);
 
         return ResponseEntity.ok(Map.of("token", token, "role", user.getRol().getNombreRol()));
     }
