@@ -1,15 +1,17 @@
 package com.cibertec.demo.dto;
 
+import com.cibertec.demo.modelo.Rol;
+
 public class AuthResponse {
 
     private String token;
     private String usuario;
-    private String rol;
+    private Rol rol;
 
     public AuthResponse() {
     }
 
-    public AuthResponse(String token, String usuario, String rol) {
+    public AuthResponse(String token, String usuario, Rol rol) {
         this.token = token;
         this.usuario = usuario;
         this.rol = rol;
@@ -31,11 +33,11 @@ public class AuthResponse {
         this.usuario = usuario;
     }
 
-    public String getRol() {
+    public Rol getRol() {
         return rol;
     }
 
-    public void setRol(String rol) {
+    public void setRol(Rol rol) {
         this.rol = rol;
     }
 }

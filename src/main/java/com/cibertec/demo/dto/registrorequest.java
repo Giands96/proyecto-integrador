@@ -1,10 +1,12 @@
 package com.cibertec.demo.dto;
 
+import com.cibertec.demo.modelo.Rol;
+
 public class registrorequest {
 
     private String usuario;
     private String clave;
-    private String rol;
+    private Rol rol;
 
     public String getUsuario() {
         return usuario;
@@ -22,11 +24,11 @@ public class registrorequest {
         this.clave = clave;
     }
 
-    public String getRol() {
+    public Rol getRol() {
         return rol;
     }
 
-    public void setRol(String rol) {
+    public void setRol(Rol rol) {
         this.rol = rol;
     }
 }

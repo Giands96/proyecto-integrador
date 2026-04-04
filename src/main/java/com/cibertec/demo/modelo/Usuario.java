@@ -16,8 +16,10 @@ public class Usuario {
     @Column(name = "clave", nullable = false)
     private String clave;
 
+    @Enumerated
     @Column(name = "rol", nullable = false)
-    private String rol;
+    //* Los roles son: OPERADOR, ADMINISTRADOR, CHOFER
+    private Rol rol;
 
     public Integer getId() {
         return id;
@@ -43,11 +45,11 @@ public class Usuario {
         this.clave = clave;
     }
 
-    public String getRol() {
+    public Rol getRol() {
         return rol;
     }
 
-    public void setRol(String rol) {
+    public void setRol(Rol rol) {
         this.rol = rol;
     }
 }
