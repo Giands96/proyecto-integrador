@@ -4,26 +4,24 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 @Entity
-@Table(name = "chofer")
+@Table(name = "operador")
 @Data
-public class Chofer {
+public class Operador {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_chofer")
-    private Integer idChofer;
+    @Column(name = "id_operador")
+    private Integer idOperador;
 
     @OneToOne
     @JoinColumn(name = "id_usuario", nullable = false, unique = true)
     private Usuario usuario;
 
+    @ManyToOne
+    @JoinColumn(name = "id_terminal", nullable = false)
+    private Terminal terminal;
+
     @Column(name = "nombres_completos", nullable = false, length = 150)
     private String nombresCompletos;
-
-    @Column(name = "licencia", nullable = false, unique = true, length = 50)
-    private String licencia;
-
-    @Column(name = "disponibilidad", nullable = false)
-    private Integer disponibilidad = 1;
 
 }

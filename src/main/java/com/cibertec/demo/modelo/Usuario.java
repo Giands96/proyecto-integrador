@@ -1,55 +1,30 @@
 package com.cibertec.demo.modelo;
 
 import jakarta.persistence.*;
+import lombok.Data;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "usuario")
+@Data
 public class Usuario {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    @Column(name = "id_usuario")
+    private Integer idUsuario;
 
-    @Column(name = "usuario", nullable = false, unique = true)
-    private String usuario;
-
-    @Column(name = "clave", nullable = false)
-    private String clave;
-
-    @Enumerated
-    @Column(name = "rol", nullable = false)
-    //* Los roles son: OPERADOR, ADMINISTRADOR, CHOFER
+    @ManyToOne
+    @JoinColumn(name = "id_rol", nullable = false)
     private Rol rol;
 
-    public Integer getId() {
-        return id;
-    }
+    @Column(name = "username", nullable = false, unique = true, length = 50)
+    private String username;
 
-    public void setId(Integer id) {
-        this.id = id;
-    }
+    @Column(name = "password", nullable = false, length = 255)
+    private String password;
 
-    public String getUsuario() {
-        return usuario;
-    }
+    @Column(name = "fecha_creacion", insertable = false, updatable = false)
+    private LocalDateTime fechaCreacion;
 
-    public void setUsuario(String usuario) {
-        this.usuario = usuario;
-    }
-
-    public String getClave() {
-        return clave;
-    }
-
-    public void setClave(String clave) {
-        this.clave = clave;
-    }
-
-    public Rol getRol() {
-        return rol;
-    }
-
-    public void setRol(Rol rol) {
-        this.rol = rol;
-    }
 }

@@ -4,23 +4,17 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 @Entity
-@Table(name = "cliente")
+@Table(name = "terminal")
 @Data
-public class Cliente {
+public class Terminal {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_cliente")
-    private Integer idCliente;
+    @Column(name = "id_terminal")
+    private Integer idTerminal;
 
-    @Column(name = "tipo_documento", nullable = false, length = 20)
-    private String tipoDocumento;
-
-    @Column(name = "numero_documento", nullable = false, unique = true, length = 50)
-    private String numeroDocumento;
-
-    @Column(name = "nombres_razon_social", nullable = false, length = 150)
-    private String nombresRazonSocial;
+    @Column(name = "nombre_ubicacion", nullable = false, length = 100)
+    private String nombreUbicacion;
 
     @Column(name = "departamento", nullable = false, length = 100)
     private String departamento;

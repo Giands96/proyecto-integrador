@@ -1,89 +1,45 @@
 package com.cibertec.demo.controller;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import com.cibertec.demo.dto.AuthResponse;
-import com.cibertec.demo.dto.LoginRequest;
-import com.cibertec.demo.dto.registrorequest;
 import com.cibertec.demo.modelo.Usuario;
 import com.cibertec.demo.repository.UsuarioRepository;
-import com.cibertec.demo.security.CustomUserDetailsService;
 import com.cibertec.demo.security.JwtService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping("/auth")
 public class AuthController {
 
-    private final UsuarioRepository usuarioRepository;
-    private final PasswordEncoder passwordEncoder;
-    private final AuthenticationManager authenticationManager;
-    private final JwtService jwtService;
-    private final CustomUserDetailsService customUserDetailsService;
+    @Autowired
+    private AuthenticationManager authenticationManager;
 
-    public AuthController(UsuarioRepository usuarioRepository,
-                          PasswordEncoder passwordEncoder,
-                          AuthenticationManager authenticationManager,
-                          JwtService jwtService,
-                          CustomUserDetailsService customUserDetailsService) {
-        this.usuarioRepository = usuarioRepository;
-        this.passwordEncoder = passwordEncoder;
-        this.authenticationManager = authenticationManager;
-        this.jwtService = jwtService;
-        this.customUserDetailsService = customUserDetailsService;
-    }
+    @Autowired
+    private UsuarioRepository usuarioRepository;
 
-    @PostMapping("/register")
-    public ResponseEntity<?> register(@RequestBody registrorequest request) {
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
-        if (usuarioRepository.findByUsuario(request.getUsuario()).isPresent()) {
-            return ResponseEntity.badRequest().body("El usuario ya existe");
-        }
-
-        Usuario usuario = new Usuario();
-        usuario.setUsuario(request.getUsuario());
-        usuario.setClave(passwordEncoder.encode(request.getClave()));
-        usuario.setRol(request.getRol());
-
-        usuarioRepository.save(usuario);
-
-        return ResponseEntity.ok("Usuario registrado correctamente");
-    }
+    @Autowired
+    private JwtService jwtService;
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest request) {
-        try {
-            authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                    request.getUsuario(),
-                    request.getClave()
-                )
-            );
+    public ResponseEntity<?> login(@RequestBody Map<String, String> request) {
+        String username = request.get("username");
+        String password = request.get("password");
 
-            UserDetails userDetails = customUserDetailsService.loadUserByUsername(request.getUsuario());
-            String token = jwtService.generateToken(userDetails);
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(username, password)
+        );
 
-            Usuario usuario = usuarioRepository.findByUsuario(request.getUsuario()).orElseThrow();
+        Usuario user = usuarioRepository.findByUsername(username).orElseThrow();
+        String token = jwtService.generateToken(user.getUsername());
 
-            return ResponseEntity.ok(new AuthResponse(token, usuario.getUsuario(), usuario.getRol()));
-
-        } catch (BadCredentialsException e) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Usuario o clave incorrectos");
-        }
-    }
-
-    @GetMapping("/perfil")
-    public ResponseEntity<?> perfil() {
-        return ResponseEntity.ok("Acceso permitido con JWT");
+        return ResponseEntity.ok(Map.of("token", token, "role", user.getRol().getNombreRol()));
     }
 }
