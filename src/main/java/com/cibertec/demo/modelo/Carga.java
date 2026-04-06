@@ -19,4 +19,7 @@ public class Carga {
     @Column(name = "descripcion_carga", nullable = false, columnDefinition = "TEXT")
     private String descripcionCarga;
 
+    @Column(name = "codigo_seguimiento", unique = true, length = 20)
+    private String codigoSeguimiento;
+
 }

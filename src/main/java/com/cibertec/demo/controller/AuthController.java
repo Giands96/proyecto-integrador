@@ -43,6 +43,7 @@ public class AuthController {
         String username = request.getUsuario();
         String password = request.getClave();
 
+
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(username, password)
         );
