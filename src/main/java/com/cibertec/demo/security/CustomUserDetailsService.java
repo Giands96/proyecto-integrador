@@ -29,7 +29,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         return new User(
                 usuario.getUsername(),
                 usuario.getPassword(),
-                Collections.singletonList(new SimpleGrantedAuthority(usuario.getRol().getNombreRol()))
+                Collections.singletonList(new SimpleGrantedAuthority(String.valueOf(usuario.getRol())))
         );
     }
 }
