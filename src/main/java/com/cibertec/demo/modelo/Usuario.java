@@ -16,10 +16,10 @@ public class Usuario {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_usuario")
-    private Integer idUsuario;
+    private Long idUsuario;
 
-    @ManyToOne
-    @JoinColumn(name = "id_rol", nullable = false)
+    @Enumerated(EnumType.STRING)
+    @Column(name = "rol", nullable = false, length = 20)
     private Rol rol;
 
     @Column(name = "username", nullable = false, unique = true, length = 50)
@@ -27,6 +27,12 @@ public class Usuario {
 
     @Column(name = "password", nullable = false, length = 255)
     private String password;
+
+    @Column(name = "nombres", nullable = false, length = 100)
+    private String nombres;
+
+    @Column(name = "apellidos", nullable = false, length = 100)
+    private String apellidos;
 
     @Column(name = "fecha_creacion", insertable = false, updatable = false)
     private LocalDateTime fechaCreacion;

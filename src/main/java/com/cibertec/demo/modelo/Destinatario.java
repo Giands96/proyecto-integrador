@@ -11,7 +11,7 @@ public class Destinatario {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_destinatario")
-    private Integer idDestinatario;
+    private Long idDestinatario;
 
     @Column(name = "tipo_documento", nullable = false, length = 20)
     private String tipoDocumento;

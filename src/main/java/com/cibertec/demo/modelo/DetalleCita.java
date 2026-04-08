@@ -12,7 +12,7 @@ public class DetalleCita {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_detalle")
-    private Integer idDetalle;
+    private Long idDetalle;
 
     @ManyToOne
     @JoinColumn(name = "id_cita", nullable = false)
@@ -39,18 +39,24 @@ public class DetalleCita {
     private Carga carga;
 
     @ManyToOne
-    @JoinColumn(name = "id_chofer")
-    private Chofer chofer;
+    @JoinColumn(name = "id_usuario")
+    private Usuario usuario;
 
     @ManyToOne
     @JoinColumn(name = "id_camion")
     private Camion camion;
 
-    @Column(name = "fecha_registro", nullable = false, insertable = false, updatable = false)
-    private LocalDateTime fechaRegistro;
+    @Column(name = "fecha_registro", nullable = false, updatable = false)
+    private LocalDateTime fechaRegistro = LocalDateTime.now();
+
+    @Column(name = "dias_estimados")
+    private Integer diasEstimados;
 
     @Column(name = "fecha_llegada")
     private LocalDateTime fechaLlegada;
+
+
+
 
     @Enumerated(EnumType.STRING)
     @Column(name = "estado", nullable = false)
@@ -60,6 +66,6 @@ public class DetalleCita {
     private String observacion;
 
     public enum EstadoDetalle {
-        POR_ASIGNAR, PROGRAMADO, EN_CAMINO, ENTREGADO
+        POR_ASIGNAR, PROGRAMADO, EN_CAMINO, ENTREGADO, CANCELADO
     }
 }

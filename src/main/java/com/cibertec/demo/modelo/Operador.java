@@ -11,7 +11,7 @@ public class Operador {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id_operador")
-    private Integer idOperador;
+    private Long idOperador;
 
     @OneToOne
     @JoinColumn(name = "id_usuario", nullable = false, unique = true)
