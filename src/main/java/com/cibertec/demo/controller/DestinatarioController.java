@@ -3,6 +3,9 @@ package com.cibertec.demo.controller;
 import com.cibertec.demo.modelo.Destinatario;
 import com.cibertec.demo.repository.DestinatarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -16,8 +19,8 @@ public class DestinatarioController {
     private DestinatarioRepository destinatarioRepository;
 
     @GetMapping
-    public List<Destinatario> listar() {
-        return destinatarioRepository.findAll();
+    public Page<Destinatario> listar(@PageableDefault(size = 10) Pageable pageable) {
+        return destinatarioRepository.findAll(pageable);
     }
 
     @PostMapping
@@ -26,7 +29,7 @@ public class DestinatarioController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Destinatario> actualizar(@PathVariable Integer id, @RequestBody Destinatario detalles) {
+    public ResponseEntity<Destinatario> actualizar(@PathVariable Long id, @RequestBody Destinatario detalles) {
         return destinatarioRepository.findById(id)
                 .map(dest -> {
                     dest.setTipoDocumento(detalles.getTipoDocumento());
@@ -43,7 +46,7 @@ public class DestinatarioController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> eliminar(@PathVariable Integer id) {
+    public ResponseEntity<Void> eliminar(@PathVariable Long id) {
         return destinatarioRepository.findById(id)
                 .map(dest -> {
                     destinatarioRepository.delete(dest);
