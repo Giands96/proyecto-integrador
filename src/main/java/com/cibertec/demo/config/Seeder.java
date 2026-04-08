@@ -2,7 +2,6 @@ package com.cibertec.demo.config;
 
 import com.cibertec.demo.modelo.Rol;
 import com.cibertec.demo.modelo.Usuario;
-import com.cibertec.demo.repository.RolRepository;
 import com.cibertec.demo.repository.UsuarioRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
@@ -15,12 +14,10 @@ import java.util.Base64;
 public class Seeder implements CommandLineRunner {
 
     private final UsuarioRepository usuarioRepository;
-    private final RolRepository rolRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public Seeder(UsuarioRepository usuarioRepository, RolRepository rolRepository, PasswordEncoder passwordEncoder) {
+    public Seeder(UsuarioRepository usuarioRepository, PasswordEncoder passwordEncoder) {
         this.usuarioRepository = usuarioRepository;
-        this.rolRepository = rolRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -28,20 +25,16 @@ public class Seeder implements CommandLineRunner {
     public void run(String... args) throws Exception {
         String adminUsername = "ransa_admin@402";
 
-        // Crear rol ADMIN si no existe
-        Rol adminRol = rolRepository.findByNombreRol("ADMIN").orElseGet(() -> {
-            Rol r = new Rol();
-            r.setNombreRol("ADMIN");
-            return rolRepository.save(r);
-        });
 
         // Crear usuario admin si no existe
         if (usuarioRepository.findByUsername(adminUsername).isEmpty()) {
             String rawPassword = generateRandomPassword(12);
             Usuario usuario = Usuario.builder()
+                    .nombres("Admin")
+                    .apellidos("User")
                     .username(adminUsername)
                     .password(passwordEncoder.encode(rawPassword))
-                    .rol(adminRol)
+                    .rol(Rol.ADMINISTRADOR)
                     .build();
 
             usuarioRepository.save(usuario);
