@@ -5,6 +5,8 @@ import com.cibertec.demo.modelo.DetalleCita;
 import com.cibertec.demo.repository.CitaRepository;
 import com.cibertec.demo.repository.DetalleCitaRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import java.util.List;
 
@@ -17,12 +19,12 @@ public class CitaService {
     @Autowired
     private DetalleCitaRepository detalleRepo;
 
-    public List<Cita> listarCitas() {
-        return citaRepo.findAll();
+    public Page<Cita> listarCitas(Pageable pageable) {
+        return citaRepo.findAll(pageable);
     }
 
-    public List<DetalleCita> listarDetalles() {
-        return detalleRepo.findAll();
+    public Page<DetalleCita> listarDetalles(Pageable pageable) {
+        return detalleRepo.findAll(pageable);
     }
 
     public Cita guardarCita(Cita cita) {
@@ -32,4 +34,14 @@ public class CitaService {
     public DetalleCita guardarDetalle(DetalleCita detalle) {
         return detalleRepo.save(detalle);
     }
+
+    public DetalleCita actualizarEstado(Long id, DetalleCita.EstadoDetalle nuevoEstado) {
+        return detalleRepo.findById(id)
+                .map(d -> {
+                    d.setEstado(nuevoEstado);
+                    return detalleRepo.save(d);
+                })
+                .orElseThrow(() -> new RuntimeException("Detalle no encontrado"));
+    }
+
 }

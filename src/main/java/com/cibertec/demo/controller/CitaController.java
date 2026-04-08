@@ -1,13 +1,19 @@
 package com.cibertec.demo.controller;
 
+import com.cibertec.demo.dto.CitaCompletaRequest;
 import com.cibertec.demo.modelo.*;
 import com.cibertec.demo.repository.*;
 import com.cibertec.demo.service.CitaService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/citas")
@@ -29,19 +35,19 @@ public class CitaController {
     private CargaRepository cargaRepository;
 
     @Autowired
-    private ChoferRepository choferRepository;
+    private UsuarioRepository usuarioRepository;
 
     @Autowired
     private CamionRepository camionRepository;
 
     @GetMapping
-    public List<Cita> listarCitas() {
-        return citaService.listarCitas();
+    public Page<Cita> listarCitas(@PageableDefault(size = 10) Pageable pageable) {
+        return citaService.listarCitas(pageable);
     }
 
     @GetMapping("/detalles")
-    public List<DetalleCita> listarDetalles() {
-        return citaService.listarDetalles();
+    public Page<DetalleCita> listarDetalles(@PageableDefault(size = 10) Pageable pageable) {
+        return citaService.listarDetalles(pageable);
     }
 
     @PostMapping("/guardar")
@@ -54,7 +60,7 @@ public class CitaController {
             // 2. Crear Detalle
             DetalleCita detalle = new DetalleCita();
             detalle.setCita(cita);
-            
+
             Cliente cliente = clienteRepository.findById(request.getIdCliente()).orElse(null);
             Destinatario dest = destinatarioRepository.findById(request.getIdDestinatario()).orElse(null);
             Terminal origen = terminalRepository.findById(request.getIdTerminalOrigen()).orElse(null);
@@ -68,17 +74,24 @@ public class CitaController {
             detalle.setDestinatario(dest);
             detalle.setTerminalOrigen(origen);
             detalle.setCarga(carga);
-            
+
             if (request.getIdTerminalDestino() != null) {
                 detalle.setTerminalDestino(terminalRepository.findById(request.getIdTerminalDestino()).orElse(null));
             }
-            
-            if (request.getIdChofer() != null) {
-                detalle.setChofer(choferRepository.findById(request.getIdChofer()).orElse(null));
+
+            if (request.getIdUsuario() != null) {
+                detalle.setUsuario(usuarioRepository.findById(request.getIdUsuario()).orElse(null));
             }
 
             if (request.getIdCamion() != null) {
                 detalle.setCamion(camionRepository.findById(request.getIdCamion()).orElse(null));
+            }
+
+            // NUEVA LÓGICA DE TIEMPO ESTIMADO ⏱️
+            if (request.getDiasEstimados() != null) {
+                detalle.setDiasEstimados(request.getDiasEstimados());
+                // Calculamos la fecha de llegada sumando los días a la fecha actual
+                detalle.setFechaLlegada(LocalDateTime.now().plusDays(request.getDiasEstimados()));
             }
 
             detalle.setEstado(DetalleCita.EstadoDetalle.POR_ASIGNAR);
@@ -93,32 +106,26 @@ public class CitaController {
         }
     }
 
-    public static class CitaCompletaRequest {
-        private Integer idCliente;
-        private Integer idDestinatario;
-        private Integer idTerminalOrigen;
-        private Integer idTerminalDestino;
-        private Integer idCarga;
-        private Integer idChofer;
-        private Integer idCamion;
-        private String observacion;
 
-        // Getters and Setters
-        public Integer getIdCliente() { return idCliente; }
-        public void setIdCliente(Integer idCliente) { this.idCliente = idCliente; }
-        public Integer getIdDestinatario() { return idDestinatario; }
-        public void setIdDestinatario(Integer idDestinatario) { this.idDestinatario = idDestinatario; }
-        public Integer getIdTerminalOrigen() { return idTerminalOrigen; }
-        public void setIdTerminalOrigen(Integer idTerminalOrigen) { this.idTerminalOrigen = idTerminalOrigen; }
-        public Integer getIdTerminalDestino() { return idTerminalDestino; }
-        public void setIdTerminalDestino(Integer idTerminalDestino) { this.idTerminalDestino = idTerminalDestino; }
-        public Integer getIdCarga() { return idCarga; }
-        public void setIdCarga(Integer idCarga) { this.idCarga = idCarga; }
-        public Integer getIdChofer() { return idChofer; }
-        public void setIdChofer(Integer idChofer) { this.idChofer = idChofer; }
-        public Integer getIdCamion() { return idCamion; }
-        public void setIdCamion(Integer idCamion) { this.idCamion = idCamion; }
-        public String getObservacion() { return observacion; }
-        public void setObservacion(String observacion) { this.observacion = observacion; }
+    @PutMapping("/detalles/{id}/estado")
+    public ResponseEntity<?> actualizarEstadoCita(@PathVariable Long id, @RequestBody Map<String, String> request) {
+        try {
+            String estadoStr = request.get("estado");
+            if (estadoStr == null) {
+                return ResponseEntity.badRequest().body("El campo 'estado' es requerido");
+            }
+
+            DetalleCita.EstadoDetalle nuevoEstado = DetalleCita.EstadoDetalle.valueOf(estadoStr.toUpperCase());
+
+            DetalleCita detalleActualizado = citaService.actualizarEstado(id, nuevoEstado);
+            return ResponseEntity.ok(detalleActualizado);
+
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body("Estado no válido. Use: POR_ASIGNAR, PROGRAMADO, EN_CAMINO, ENTREGADO, CANCELADO");
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error al actualizar el estado: " + e.getMessage());
+        }
     }
+
+
 }
