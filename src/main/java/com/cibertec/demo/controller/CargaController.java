@@ -1,7 +1,9 @@
 package com.cibertec.demo.controller;
 
 import com.cibertec.demo.modelo.Carga;
+import com.cibertec.demo.modelo.CargaEstado;
 import com.cibertec.demo.repository.CargaRepository;
+import com.cibertec.demo.service.CargaService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -16,6 +18,9 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/cargas")
 public class CargaController {
+
+    @Autowired
+    private CargaService cargaService;
 
     @Autowired
     private CargaRepository cargaRepository;
@@ -40,9 +45,17 @@ public class CargaController {
                 .map(carga -> {
                     carga.setTipoCarga(cargaDetalles.getTipoCarga());
                     carga.setDescripcionCarga(cargaDetalles.getDescripcionCarga());
+                    carga.setEstado(cargaDetalles.getEstado());
                     // No permitimos actualizar el código de seguimiento una vez creado
                     return ResponseEntity.ok(cargaRepository.save(carga));
                 })
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PutMapping("/{id}/estado")
+    public ResponseEntity<Carga> actualizarEstado(@PathVariable Long id, @RequestParam CargaEstado nuevoEstado) {
+        return cargaService.actualizarEstado(id, nuevoEstado)
+                .map(carga -> ResponseEntity.ok(carga))
                 .orElse(ResponseEntity.notFound().build());
     }
 
