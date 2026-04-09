@@ -1,6 +1,8 @@
 package com.cibertec.demo.modelo;
 
 import com.cibertec.demo.modelo.dto.ClienteCargaDTO;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Data;
 
@@ -27,7 +29,9 @@ public class Carga {
     @Enumerated(EnumType.STRING)
     private CargaEstado estado = CargaEstado.PENDIENTE;
 
-    @Column(name="cliente", nullable = false)
-    private ClienteCargaDTO cliente;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "id_cliente", nullable = false)
+    @JsonIgnoreProperties({"cargas", "hibernateLazyInitializer", "handler"})
+    private Cliente cliente;
 
 }
