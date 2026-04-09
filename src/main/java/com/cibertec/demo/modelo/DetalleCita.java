@@ -55,9 +55,6 @@ public class DetalleCita {
     @Column(name = "fecha_llegada")
     private LocalDateTime fechaLlegada;
 
-
-
-
     @Enumerated(EnumType.STRING)
     @Column(name = "estado", nullable = false)
     private EstadoDetalle estado;
