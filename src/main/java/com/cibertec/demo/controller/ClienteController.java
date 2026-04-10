@@ -18,12 +18,17 @@ public class ClienteController {
     @Autowired
     private ClienteRepository clienteRepository;
 
-    @GetMapping
+    @GetMapping("/")
     public Page<Cliente> listar(@PageableDefault(size = 10) Pageable pageable) {
         return clienteRepository.findAll(pageable);
     }
 
-    @PostMapping
+    @GetMapping("/listar")
+    public ResponseEntity<List> listaClientes() {
+        return ResponseEntity.ok(clienteRepository.findAll());
+    }
+
+    @PostMapping("/crear")
     public Cliente crear(@RequestBody Cliente cliente) {
         return clienteRepository.save(cliente);
     }

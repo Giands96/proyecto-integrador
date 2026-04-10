@@ -3,7 +3,11 @@ package com.cibertec.demo.controller;
 import com.cibertec.demo.modelo.Rol;
 import com.cibertec.demo.modelo.Usuario;
 import com.cibertec.demo.repository.UsuarioRepository;
+import com.cibertec.demo.service.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -15,9 +19,18 @@ public class UsuarioController {
     @Autowired
     private UsuarioRepository usuarioRepository;
 
+    @Autowired
+    private UsuarioService usuarioService;
+
     @GetMapping("/")
-    public ResponseEntity<?> getEmpleados() {
-        return ResponseEntity.ok(usuarioRepository.findAll());
+    public ResponseEntity<Page<Usuario>> getEmpleados(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Usuario> empleados = usuarioService.listarEmpleados(pageable);
+
+        return ResponseEntity.ok(empleados);
     }
 
     @GetMapping("/operador")
