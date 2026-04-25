@@ -3,13 +3,15 @@ package com.cibertec.demo.modelo;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
+
 
 @Entity
 @Table(name = "camion")
-@Data
 @Getter
 @Setter
+@NoArgsConstructor
 public class Camion {
 
     @Id

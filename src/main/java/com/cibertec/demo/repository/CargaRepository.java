@@ -12,4 +12,8 @@ import java.util.Optional;
 public interface CargaRepository extends JpaRepository<Carga, Long> {
     List<Carga> findByEstado(CargaEstado estado);
     Optional<Carga> findByCodigoSeguimiento(String codigoSeguimiento);
+    Optional<Carga> findByCodigoSeguimientoAndClienteNumeroDocumento(
+            String codigoSeguimiento,
+            String numeroDocumento
+    );
 }

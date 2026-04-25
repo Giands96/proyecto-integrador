@@ -11,8 +11,8 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDateTime;
 import java.util.Map;
+
 
 @RestController
 @RequestMapping("/api/citas")
@@ -44,95 +44,45 @@ public class CitaController {
         return citaService.listarCitas(pageable);
     }
 
-    @GetMapping("/detalles")
-    public Page<DetalleCita> listarDetalles(@PageableDefault(size = 10) Pageable pageable) {
-        return citaService.listarDetalles(pageable);
-    }
 
     @PostMapping("/guardar")
-    public ResponseEntity<?> guardarCitaCompleta(@RequestBody CitaCompletaRequest request) {
+    public ResponseEntity<?> guardarCita(@RequestBody CitaCompletaRequest request) {
         try {
-            //  Crear Cita
-            Cita cita = new Cita();
-            cita = citaService.guardarCita(cita);
-
-            //  Crear Detalle
-            DetalleCita detalle = new DetalleCita();
-            detalle.setCita(cita);
-
-            Cliente cliente = clienteRepository.findById(request.getIdCliente()).orElse(null);
-            Destinatario dest = destinatarioRepository.findById(request.getIdDestinatario()).orElse(null);
-            Terminal origen = terminalRepository.findById(request.getIdTerminalOrigen()).orElse(null);
-            Carga carga = cargaRepository.findById(request.getIdCarga()).orElse(null);
-
-            if (cliente == null || dest == null || origen == null || carga == null) {
-                return ResponseEntity.badRequest().body("Datos de cliente, destinatario, terminal u origen no válidos");
-            }
-
-            detalle.setCliente(cliente);
-            detalle.setDestinatario(dest);
-            detalle.setTerminalOrigen(origen);
-            detalle.setCarga(carga);
-            carga.setEstado(CargaEstado.PENDIENTE);
-
-
-            if (request.getIdTerminalDestino() != null) {
-                detalle.setTerminalDestino(terminalRepository.findById(request.getIdTerminalDestino()).orElse(null));
-            }
-
-            //* Validar si el usuario a asignar es un Chofer antes de asignarlo a la cita
-            if (request.getIdUsuario() != null && usuarioRepository.findByRol(Rol.CHOFER).stream().anyMatch(u -> u.getIdUsuario().equals(request.getIdUsuario()))) {
-                detalle.setUsuario(usuarioRepository.findById(request.getIdUsuario()).orElse(null));
-            }
-
-            if (request.getIdCamion() != null) {
-                detalle.setCamion(camionRepository.findById(request.getIdCamion()).orElse(null));
-            }
-
-            // NUEVA LÓGICA DE TIEMPO ESTIMADO ⏱️
-            if (request.getDiasEstimados() != null) {
-                detalle.setDiasEstimados(request.getDiasEstimados());
-                // Calculamos la fecha de llegada sumando los días a la fecha actual
-                detalle.setFechaLlegada(LocalDateTime.now().plusDays(request.getDiasEstimados()));
-            }
-
-            detalle.setEstado(DetalleCita.EstadoDetalle.POR_ASIGNAR);
-            detalle.setObservacion(request.getObservacion());
-
-            citaService.guardarDetalle(detalle);
-
-            return ResponseEntity.ok("Cita y detalle guardados correctamente con ID: " + cita.getIdCita());
-
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body("Error al guardar: " + e.getMessage());
+            Cita cita = citaService.crearCitaCompleta(request);
+            return ResponseEntity.ok("Cita guardada correctamente con ID: " + cita.getIdCita());
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
-    @PostMapping("/form-data")
-    public ResponseEntity<?> formulario() {
-        return null;
-    }
-
-
-    @PutMapping("/detalles/{id}/estado")
-    public ResponseEntity<?> actualizarEstadoCita(@PathVariable Long id, @RequestBody Map<String, String> request) {
+    @PutMapping("/{id}/estado")
+    public ResponseEntity<?> actualizarEstadoCita(
+            @PathVariable Long id,
+            @RequestBody Map<String, String> request
+    ) {
         try {
             String estadoStr = request.get("estado");
-            if (estadoStr == null) {
+
+            if (estadoStr == null || estadoStr.isBlank()) {
                 return ResponseEntity.badRequest().body("El campo 'estado' es requerido");
             }
 
-            DetalleCita.EstadoDetalle nuevoEstado = DetalleCita.EstadoDetalle.valueOf(estadoStr.toUpperCase());
+            Cita.EstadoCita nuevoEstado = Cita.EstadoCita.valueOf(estadoStr.toUpperCase());
 
-            DetalleCita detalleActualizado = citaService.actualizarEstado(id, nuevoEstado);
-            return ResponseEntity.ok(detalleActualizado);
+            Cita citaActualizada = citaService.actualizarEstado(id, nuevoEstado);
+
+            return ResponseEntity.ok(citaActualizada);
 
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body("Estado no válido. Use: POR_ASIGNAR, PROGRAMADO, EN_CAMINO, ENTREGADO, CANCELADO");
-        } catch (Exception e) {
-            return ResponseEntity.status(500).body("Error al actualizar el estado: " + e.getMessage());
+            return ResponseEntity.badRequest()
+                    .body("Estado no válido. Use: POR_ASIGNAR, PROGRAMADO, EN_CAMINO, ENTREGADO, CANCELADO");
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
+
+
 
 
 }
