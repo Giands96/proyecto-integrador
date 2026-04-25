@@ -43,7 +43,6 @@ public class UsuarioController {
         return ResponseEntity.ok(usuarioRepository.findByRol(Rol.CHOFER));
     }
 
-    @PreAuthorize("hasAuthority('ADMINISTRADOR')")
     @PutMapping("/{id}")
     public ResponseEntity<?> actualizarEmpleado(@PathVariable Long id, @RequestBody Usuario datosActualizados) {
         return usuarioRepository.findById(id).map(usuario -> {

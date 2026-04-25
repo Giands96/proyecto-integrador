@@ -28,7 +28,15 @@ public class CitaService {
     }
 
     public Cita guardarCita(Cita cita) {
-        return citaRepo.save(cita);
+        Cita nuevaCita = citaRepo.save(cita);
+        //  Si la cita tiene detalles, guardarlos también
+        if (cita.getDetalles() != null) {
+            for (DetalleCita detalle : cita.getDetalles()) {
+                detalle.setCita(nuevaCita); //  Asociar el detalle con la cita recién creada
+                detalleRepo.save(detalle);
+            }
+        }
+
     }
 
     public DetalleCita guardarDetalle(DetalleCita detalle) {

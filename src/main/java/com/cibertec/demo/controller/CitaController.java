@@ -12,7 +12,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -53,11 +52,11 @@ public class CitaController {
     @PostMapping("/guardar")
     public ResponseEntity<?> guardarCitaCompleta(@RequestBody CitaCompletaRequest request) {
         try {
-            // 1. Crear Cita
+            //  Crear Cita
             Cita cita = new Cita();
             cita = citaService.guardarCita(cita);
 
-            // 2. Crear Detalle
+            //  Crear Detalle
             DetalleCita detalle = new DetalleCita();
             detalle.setCita(cita);
 
@@ -74,12 +73,15 @@ public class CitaController {
             detalle.setDestinatario(dest);
             detalle.setTerminalOrigen(origen);
             detalle.setCarga(carga);
+            carga.setEstado(CargaEstado.PENDIENTE);
+
 
             if (request.getIdTerminalDestino() != null) {
                 detalle.setTerminalDestino(terminalRepository.findById(request.getIdTerminalDestino()).orElse(null));
             }
 
-            if (request.getIdUsuario() != null) {
+            //* Validar si el usuario a asignar es un Chofer antes de asignarlo a la cita
+            if (request.getIdUsuario() != null && usuarioRepository.findByRol(Rol.CHOFER).stream().anyMatch(u -> u.getIdUsuario().equals(request.getIdUsuario()))) {
                 detalle.setUsuario(usuarioRepository.findById(request.getIdUsuario()).orElse(null));
             }
 
@@ -104,6 +106,11 @@ public class CitaController {
         } catch (Exception e) {
             return ResponseEntity.status(500).body("Error al guardar: " + e.getMessage());
         }
+    }
+
+    @PostMapping("/form-data")
+    public ResponseEntity<?> formulario() {
+        return null;
     }
 
 

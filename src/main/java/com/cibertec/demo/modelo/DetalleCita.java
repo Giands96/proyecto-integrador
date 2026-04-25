@@ -16,9 +16,9 @@ public class DetalleCita {
     @Column(name = "id_detalle")
     private Long idDetalle;
 
-    @ManyToOne(fetch = FetchType.LAZY) // Opcional: Puedes dejarlo sin fetch, pero Hibernate suele usar LAZY por defecto en algunas configuraciones
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id_cita", nullable = false)
-    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    @JsonIgnoreProperties({"detalles","hibernateLazyInitializer", "handler"})
     private Cita cita;
 
     @ManyToOne
