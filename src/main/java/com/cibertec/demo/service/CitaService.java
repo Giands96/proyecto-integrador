@@ -91,12 +91,58 @@ public class CitaService {
         return citaRepository.save(cita);
     }
 
+
+
+    @Transactional
     public Cita actualizarEstado(Long id, Cita.EstadoCita nuevoEstado) {
-        return citaRepository.findById(id)
-                .map(c -> {
-                    c.setEstado(nuevoEstado);
-                    return citaRepository.save(c);
-                })
+        Cita cita = citaRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Cita no encontrada"));
+
+        cita.setEstado(nuevoEstado);
+
+        Carga carga = cita.getCarga();
+
+        if (Cita.EstadoCita.CANCELADO.equals(nuevoEstado)) {
+
+            Camion camion = cita.getCamion();
+
+            if (camion != null) {
+                camion.setDisponibilidad(true);
+            }
+
+            cita.setUsuario(null);
+            cita.setCamion(null);
+
+            if (carga != null) {
+                carga.setEstado(CargaEstado.CANCELADA);
+            }
+        }
+
+        if (Cita.EstadoCita.EN_CAMINO.equals(nuevoEstado)) {
+            if (carga != null) {
+                carga.setEstado(CargaEstado.EN_TRANSITO);
+            }
+
+            if (cita.getDiasEstimados() != null) {
+                cita.setFechaLlegada(LocalDateTime.now().plusDays(cita.getDiasEstimados()));
+            }
+        }
+
+        if (Cita.EstadoCita.ENTREGADO.equals(nuevoEstado)) {
+            if (carga != null) {
+                carga.setEstado(CargaEstado.ENTREGADA);
+            }
+
+            cita.setFechaLlegada(LocalDateTime.now());
+
+            Camion camion = cita.getCamion();
+
+            if (camion != null) {
+                camion.setDisponibilidad(true);
+            }
+        }
+
+
+        return citaRepository.save(cita);
     }
 }
